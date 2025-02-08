@@ -1,68 +1,145 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-    <title>Socket.IO chat</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Socket.IO Chat</title>
     <style>
       body {
         margin: 0;
-        padding-bottom: 3rem;
+        padding-bottom: 4rem;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
           Helvetica, Arial, sans-serif;
-      }
-
-      #form {
-        background: rgba(0, 0, 0, 0.15);
-        padding: 0.25rem;
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
         display: flex;
-        height: 3rem;
-        box-sizing: border-box;
-        backdrop-filter: blur(10px);
-      }
-      #input {
-        border: none;
-        padding: 0 1rem;
-        flex-grow: 1;
-        border-radius: 2rem;
-        margin: 0.25rem;
-      }
-      #input:focus {
-        outline: none;
-      }
-      #form > button {
-        background: #333;
-        border: none;
-        padding: 0 1rem;
-        margin: 0.25rem;
-        border-radius: 3px;
-        outline: none;
-        color: #fff;
+        flex-direction: column;
+        height: 100vh;
+        overflow: hidden;
       }
 
       #messages {
         list-style-type: none;
         margin: 0;
         padding: 0;
+        flex-grow: 1;
+        overflow-y: auto;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
       }
+
+      #messages::-webkit-scrollbar {
+        display: none;
+      }
+
       #messages > li {
-        padding: 0.5rem 1rem;
+        padding: 0.75rem 1rem;
+        word-wrap: break-word;
       }
+
       #messages > li:nth-child(odd) {
-        background: #efefef;
+        background: #f1f1f1;
+      }
+
+      #form {
+        display: flex;
+        align-items: center;
+        background: rgba(0, 0, 0, 0.15);
+        padding: 0.5rem;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: auto;
+        box-sizing: border-box;
+        backdrop-filter: blur(10px);
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+
+      #input {
+        flex-grow: 1;
+        border: none;
+        padding: 0.75rem;
+        border-radius: 20px;
+        margin: 0.25rem;
+        font-size: 1rem;
+        width: 65%;
+      }
+
+      #input:focus {
+        outline: none;
+      }
+
+      /* Aesthetic buttons */
+      .button {
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 30px;
+        font-size: 1rem;
+        font-weight: bold;
+        color: white;
+        cursor: pointer;
+        text-transform: uppercase;
+        transition: all 0.3s ease-in-out;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-grow: 1;
+      }
+
+      /* Send Button */
+      .send-btn {
+        background: linear-gradient(135deg, #4CAF50, #2E8B57);
+        box-shadow: 0px 4px 10px rgba(76, 175, 80, 0.3);
+      }
+
+      .send-btn:hover {
+        background: linear-gradient(135deg, #45a049, #1c6b3f);
+      }
+
+      .send-btn:active {
+        transform: scale(0.95);
+      }
+
+      /* Toggle Button */
+      .toggle-btn {
+        background: linear-gradient(135deg, #FF5733, #C70039);
+        box-shadow: 0px 4px 10px rgba(255, 87, 51, 0.3);
+      }
+
+      .toggle-btn:hover {
+        background: linear-gradient(135deg, #e04e2c, #a5002b);
+      }
+
+      .toggle-btn:active {
+        transform: scale(0.95);
+      }
+
+      /* Mobile responsiveness */
+      @media (max-width: 600px) {
+        #form {
+          flex-direction: column;
+        }
+
+        #input {
+          width: 80%;
+          margin-bottom: 0.5rem;
+        }
+        
+        .button {
+            margin-right: 5px;
+          width: 80%;
+
+        }
       }
     </style>
   </head>
   <body>
     <ul id="messages"></ul>
-    <form id="form" action="">
-      <input id="input" autocomplete="off" /><button>Send</button>
-      <button id="toggle-btn">Disconnect</button>
+    <form id="form">
+      <input id="input" autocomplete="off" placeholder="Type a message..." />
+      <button type="submit" class="button send-btn">Send</button>
+      <button id="toggle-btn" type="button" class="button toggle-btn">Disconnect</button>
     </form>
-    <!-- To serve the client-side library dynamically. -->
+
     <script src="/socket.io/socket.io.js"></script>
     <script>
       const socket = io();
@@ -70,10 +147,11 @@
       const form = document.getElementById("form");
       const input = document.getElementById("input");
       const messages = document.getElementById("messages");
+      const toggleButton = document.getElementById("toggle-btn");
 
       form.addEventListener("submit", (e) => {
         e.preventDefault();
-        if (input.value) {
+        if (input.value.trim()) {
           socket.emit("chat message", input.value);
           input.value = "";
         }
@@ -83,10 +161,8 @@
         const item = document.createElement("li");
         item.textContent = msg;
         messages.appendChild(item);
-        window.scrollTo(0, document.body.scrollHeight);
+        messages.scrollTop = messages.scrollHeight;
       });
-
-      const toggleButton = document.getElementById("toggle-btn");
 
       toggleButton.addEventListener("click", (e) => {
         e.preventDefault();
